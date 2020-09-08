@@ -5,6 +5,7 @@ import (
 	"github.com/gorilla/mux"
 	log "github.com/sirupsen/logrus"
 	"net/http"
+	"net/url"
 	"strings"
 )
 
@@ -29,13 +30,22 @@ func main() {
 
 func (s *Storage) ShorteningURLHandler(w http.ResponseWriter, r *http.Request) {
 	d := json.NewDecoder(r.Body)
-	req := Message{}
-	err := d.Decode(&req)
+	message := Message{}
+	err := d.Decode(&message)
 	if err != nil {
 		log.Fatalf("decode error: %v", err)
 	}
-	req.URL = s.Post(req.URL)
-	data, err := json.Marshal(req)
+	_, err = url.ParseRequestURI(message.URL)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		_, err = w.Write([]byte("URL is not valid"))
+		if err != nil {
+			log.Fatalf("write error: %v", err)
+		}
+		return
+	}
+	message.URL = s.Post(message.URL)
+	data, err := json.Marshal(message)
 	if err != nil {
 		log.Fatalf("encode error: %v", err)
 	}
