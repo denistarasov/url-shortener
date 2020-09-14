@@ -9,7 +9,12 @@ import (
 	"strings"
 )
 
-type Message struct {
+type Request struct {
+	URL string `json:"url"`
+	CustomURL string `json:"custom_url"`
+}
+
+type Response struct {
 	URL string `json:"url"`
 }
 
@@ -30,12 +35,12 @@ func main() {
 
 func (s *Storage) ShorteningURLHandler(w http.ResponseWriter, r *http.Request) {
 	d := json.NewDecoder(r.Body)
-	message := Message{}
-	err := d.Decode(&message)
+	request := Request{}
+	err := d.Decode(&request)
 	if err != nil {
 		log.Fatalf("decode error: %v", err)
 	}
-	_, err = url.ParseRequestURI(message.URL)
+	_, err = url.ParseRequestURI(request.URL)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		_, err = w.Write([]byte("URL is not valid"))
@@ -44,8 +49,17 @@ func (s *Storage) ShorteningURLHandler(w http.ResponseWriter, r *http.Request) {
 		}
 		return
 	}
-	message.URL = s.Post(message.URL)
-	data, err := json.Marshal(message)
+	var response Response
+	response.URL, err = s.Post(request.URL, request.CustomURL)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		_, err = w.Write([]byte(err.Error()))
+		if err != nil {
+			log.Fatalf("write error: %v", err)
+		}
+		return
+	}
+	data, err := json.Marshal(response)
 	if err != nil {
 		log.Fatalf("encode error: %v", err)
 	}

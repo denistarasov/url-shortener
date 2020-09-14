@@ -1,12 +1,18 @@
 package main
 
-import "math/rand"
+import (
+	"fmt"
+	"math/rand"
+)
 
 const (
 	shortURLLength = 6
 )
 
-var symbols = []rune("0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
+var (
+	symbols                      = []rune("0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
+	CustomLinkAlreadyExistsError = fmt.Errorf("short link already exists")
+)
 
 type Storage struct {
 	shortToFullURLs map[string]string
@@ -33,18 +39,25 @@ func (s *Storage) Get(shortURL string) (string, bool) {
 	return fullURL, exists
 }
 
-func (s *Storage) Post(fullURL string) string {
+func (s *Storage) Post(fullURL, customLink string) (string, error) {
 	shortStr, exists := s.fullURLsToShort[fullURL]
 	if exists {
-		return shortStr
+		return shortStr, nil
 	}
-	for {
-		shortStr = generateRandomStr(shortURLLength)
-		if _, exists := s.shortToFullURLs[shortStr]; !exists {
-			break
+	if customLink != "" {
+		if _, exists := s.shortToFullURLs[customLink]; exists {
+			return "", CustomLinkAlreadyExistsError
+		}
+		shortStr = customLink
+	} else {
+		for {
+			shortStr = generateRandomStr(shortURLLength)
+			if _, exists := s.shortToFullURLs[shortStr]; !exists {
+				break
+			}
 		}
 	}
 	s.shortToFullURLs[shortStr] = fullURL
 	s.fullURLsToShort[fullURL] = shortStr
-	return shortStr
+	return shortStr, nil
 }
