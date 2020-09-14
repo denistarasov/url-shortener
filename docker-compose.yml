@@ -1,0 +1,12 @@
+version: "3"
+services:
+  db:
+    image: mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=1234
+      - MYSQL_DATABASE=golang
+
+  url-shortener:
+    build: ./
+    ports:
+      - '8100:8100'
