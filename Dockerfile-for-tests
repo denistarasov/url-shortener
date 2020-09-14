@@ -2,4 +2,4 @@ FROM golang:latest
 RUN mkdir /app
 ADD . /app/
 WORKDIR /app
-CMD ["go", "test", "-v", "./..."]
+CMD ["go", "test", "-v", "-cover", "./..."]
