@@ -7,6 +7,7 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 	log "github.com/sirupsen/logrus"
 	"math/rand"
+	"sync"
 	"time"
 )
 
@@ -62,6 +63,7 @@ func initDB() *sql.DB {
 
 type Storage struct {
 	db *sql.DB
+	m sync.Mutex
 }
 
 func NewStorage() *Storage {
@@ -125,6 +127,8 @@ func (s *Storage) Get(shortLink string) (string, bool) {
 }
 
 func (s *Storage) Post(fullURL, customLink string) (string, error) {
+	s.m.Lock()
+	defer s.m.Unlock()
 	shortLink, exists := s.findShortLink(fullURL)
 	if exists {
 		return shortLink, nil
