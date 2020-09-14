@@ -10,7 +10,7 @@ import (
 )
 
 type Request struct {
-	URL string `json:"url"`
+	URL       string `json:"url"`
 	CustomURL string `json:"custom_url"`
 }
 

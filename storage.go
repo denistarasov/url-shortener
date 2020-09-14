@@ -38,6 +38,7 @@ func initDB() *sql.DB {
 	if err != nil {
 		log.Fatalf("connection to database wasn't established after %d retries", databasePingRetryCount)
 	}
+	log.Info("connection to database is established")
 
 	queries := []string{
 		`DROP TABLE IF EXISTS urls;`,
