@@ -70,7 +70,7 @@ func (s *Storage) ShorteningURLHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Storage) RedirectionHandler(w http.ResponseWriter, r *http.Request) {
-	key := strings.TrimPrefix(r.RequestURI, "/")
+	key := strings.TrimPrefix(r.URL.Path, "/")
 	URL, exists := s.Get(key)
 	if !exists {
 		log.Infof("client requested non-existent key: %s", key)
